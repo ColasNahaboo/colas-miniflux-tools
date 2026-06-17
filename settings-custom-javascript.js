@@ -1,10 +1,11 @@
 // paste this in the Miniflux settings page, Application Settings / Custom JavaScript 
 // 'b' acts as 'v' on view: Open original link
-// 'n' first scroll the current article, then go to next one
 // ' ' on an article:
 //    - if the page contents fits in the window (no scroll), emit 'v' (Open original link)
 //    - if the page can scroll down, scroll down
 //    - if we are at the bottom, emit 'j' (Go to next item)
+// 'n' first scroll the current article, then go to next one
+// 'u' scrools up by half a page
 
 (function() {
     // Intercept the keyboard event at the root prototype level before ANY listener fires
