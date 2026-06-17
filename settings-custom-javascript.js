@@ -1,4 +1,4 @@
-// paste this in the Miniflux settings page, Application Settings / Custom JavaScript 
+v// paste this in the Miniflux settings page, Application Settings / Custom JavaScript 
 // 'b' acts as 'v' on view: Open original link
 // ' ' on an article:
 //    - if the page contents fits in the window (no scroll), emit 'v' (Open original link)
@@ -30,12 +30,14 @@
                 return realKey;
             }
 
-            // REDEFINES
-            // b ==> v
+            // ============ KEYDEFS START ============
+            
+            // KEDEF: b ==> v
             if (realKey === 'b') {
                 return 'v';
             }
-            // Smart Space either scrolls down, or go to the original article, or nesxt item
+
+            // KEYDEF: '' Smart Space either scrolls down, or go to the original article, or next item
             if (realKey === ' ') {
                 const clientHeight = document.documentElement.clientHeight;
                 const scrollHeight = document.documentElement.scrollHeight;
@@ -57,7 +59,8 @@
                 // Return ' ' normally to let the browser execute the native scroll.
                 return realKey;
             }
-
+            
+            // ============ KEYDEFS END ============
             // default is passthrough
             return realKey;
         },
