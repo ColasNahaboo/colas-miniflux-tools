@@ -3,7 +3,7 @@ The tools I use on [Miniflux](https://miniflux.app/)
 
 I started using a self-hosted Miniflux on 2026-06-16. I was using a self-hosted [FreshRSS](https://www.freshrss.org/) before, which was very nice, but was doing a lot of things I did not need.
 
-Recently I migrated my [personal website](https://colas.nahaboo.net) to [Zola](https://www.getzola.org/), and by using Zola, I become more and more convinced that minimalist, opinionated, and one single binary was the way to go. So I decided to switch to Miniflux.
+Recently I migrated my [personal website](https://colas.nahaboo.net) to [Zola](https://www.getzola.org/), and by using Zola, I became more and more convinced that minimalist, opinionated, and one single binary was the way to go. So I decided to switch to Miniflux.
 
 I will publish here the various small tools I am sure to develop for my personal use of Miniflux. Feel free, to use, copy, modify, criticize, discuss...
 
