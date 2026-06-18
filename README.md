@@ -3,7 +3,7 @@ The tools I use on [Miniflux](https://miniflux.app/)
 
 I started using a self-hosted Miniflux on 2026-06-16. I was using a self-hosted [FreshRSS](https://www.freshrss.org/) before, which was very nice, but was doing a lot of things I did not need.
 
-Recently I migrated my personal website to [Zola](https://www.getzola.org/), and I was more and more convinced that minimalist, opinionated, and one single binary was the way to go. So I decided to switch to Miniflux.
+Recently I migrated my [personal website](https://colas.nahaboo.net) to [Zola](https://www.getzola.org/), and by using Zola, I become more and more convinced that minimalist, opinionated, and one single binary was the way to go. So I decided to switch to Miniflux.
 
 I will publish here the various small tools I am sure to develop for my personal use of Miniflux. Feel free, to use, copy, modify, criticize, discuss...
 
@@ -23,6 +23,7 @@ Currently what it does is:
   - if we are at the bottom, emit 'j' (Go to next item). I consider that if the RSS contents was big enough, there was no more to read on the original article.
 - **n** scrolls down the page, and jumps to next item when at the bottom. So now, 'j' unconditionally go to the next item, but 'n' lets you read the current one firrst.
 - **i** scrolls up by half a page. Useful in combination with space that scrolls down by a full page, to read cartoons that often sit across the fold.
-- **u** Undoes 'j' by emitting [g, h, j, j, o] to go to the previous item. We cannot use 'k' in unread mode, since the previous item is now read and not available anymore in the unread view. So 'u' goes through the history page to look for it.
+- **u** Undoes 'j' by emitting [g, h, j, j, o] to go to the previous item. We cannot use 'k' in unread mode, since the previous item is now read and not available anymore in the unread view. So 'u' goes through the history page to look for it.\
+Warning: it may only work if you set your post reading order to "oldest first"
 
 But it will surely evolve as I become more and more familiar with Miniflux.
