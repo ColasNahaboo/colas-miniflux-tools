@@ -16,14 +16,21 @@ Copy the contents of the `code/settings-custom-javascript.js` file into Miniflux
 This file defines or redefines keyboard shortcuts in a modular way: each key is handled in its own `// KEYDEF:` block that you can remove at will or add yours.
 
 Currently what it does is:
-- **b** acts as a synonym for 'v' to "Open original link". This is because hitting b felt more natural to reach from my right hand on the home row.
+- **b** acts as a synonym for 'v' to "Open original link". This is because hitting b felt more natural to reach from my right hand on the home row. It however open it in a new window of the name "miniflux-reader" that it reuses, so the next opened article will replace it. Just keep this window open to the side of your miniflux main window, and you have a two-pane view! Links to the original article in the page are also modified to open in  "miniflux-reader", not "_blank", which opens a new window each time.
+- **v** still opens the original article in a new window each time.
 - **space** becomes context-dependent when reading an article:
-  - if the page contents fits in the window (no scrollbars visible), emit 'v' to "Open original link". This because when a item is short, most probably there is much more to read at the original link. 
+  - if the page contents fits in the window (no scrollbars visible), emit 'b' to "Open original link". This because when a item is short, most probably there is much more to read at the original link. 
   - if the page can scroll down, scroll down normally.
   - if we are at the bottom, emit 'j' (Go to next item). I consider that if the RSS contents was big enough, there was no more to read on the original article.
-- **n** scrolls down the page, and jumps to next item when at the bottom. So now, 'j' unconditionally go to the next item, but 'n' lets you read the current one firrst.
+  - but when on a list of items page ("unread", "category") space just open the article in the "miniflux-reader" side window, like `b`, and mark the item as read.
+- **n** scrolls down the page, and jumps to next item when at the bottom. So now, 'j' unconditionally go to the next item, but 'n' lets you read the current one first.
 - **i** scrolls up by half a page. Useful in combination with space that scrolls down by a full page, to read cartoons that often sit across the fold.
 - **u** Undoes 'j' by emitting [g, h, j, j, o] to go to the previous item. We cannot use 'k' in unread mode, since the previous item is now read and not available anymore in the unread view. So 'u' goes through the history page to look for it.\
 Warning: it may only work if you set your post reading order to "oldest first"
 
 But it will surely evolve as I become more and more familiar with Miniflux.
+
+## History
+
+- v2 2026-06-28 opens original article in talways the same window
+- v1 2026-06-18 first edition

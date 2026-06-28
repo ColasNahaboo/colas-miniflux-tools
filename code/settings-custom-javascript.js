@@ -1,4 +1,25 @@
-// paste this in the Miniflux settings, Application Settings / Custom JavaScript 
+// v2 https://github.com/ColasNahaboo/colas-miniflux-tools
+// paste this in the Miniflux settings, Application Settings / Custom JavaScript
+
+function openInMinifluxReaderWindow() {
+    // Find the original link. 
+    // We look inside the currently selected item first (for list view), 
+    // then fall back to the first match on the page (for single article view).
+    let link = document.querySelector('.current-item a[data-original-link="true"], .current a[data-original-link="true"]');
+    if (!link) {
+        link = document.querySelector('a[data-original-link="true"]');
+    }
+    if (link && link.href) {
+        // Open the URL in our specific, reusable window
+        window.open(link.href, 'miniflux-reader');
+    }
+    // mark the article as read if we did not open it
+    if (! /^\/(entry)(\/|$)/.test(window.location.pathname)) {
+        return 'm';
+    }
+    return '';
+}
+
 // 'b' acts as 'v' on view: Open original link
 // ' ' on an article:
 //    - if the page contents fits in the window (no scroll), emit 'v'
@@ -29,7 +50,7 @@
                 return realKey;
             }
             // CHECK 3: We are in 'view' windows
-            if (! /^\/(unread|history|entry)(\/|$)/.test(window.location.pathname)) {
+            if (! /^\/(unread|history|entry|category)(\/|$)/.test(window.location.pathname)) {
                 return realKey;
             }
 
@@ -38,7 +59,27 @@
             
             // KEYDEF: 'b' synonym of 'v' go to the original article
             if (realKey === 'b') {
-                return 'v';
+                return openInMinifluxReaderWindow();
+            }
+
+            // KEYDEF: ' ' Smart Space either
+            // scrolls down natively, goes to original article, or go next item
+            if (realKey === ' ') {
+                // dont scroll on items lists
+                if (/^\/(unread|category\/[0-9]*\/entries)$/.test(window.location.pathname)) {
+                    return openInMinifluxReaderWindow();
+                }
+                const clientHeight = document.documentElement.clientHeight;
+                const scrollHeight = document.documentElement.scrollHeight;
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                if (scrollHeight <= clientHeight) {
+                    return openInMinifluxReaderWindow();
+                }
+                const atBottom = (clientHeight + scrollTop >= scrollHeight - 5);
+                if (atBottom) {
+                    return 'j';
+                }
+                return realKey; 
             }
             
             // KEYDEF: 'i' Half-Page Scroll Up
@@ -76,22 +117,6 @@
                 return ''; 
             }
 
-            // KEYDEF: ' ' Smart Space either
-            // scrolls down natively, goes to original article, or go next item
-            if (realKey === ' ') {
-                const clientHeight = document.documentElement.clientHeight;
-                const scrollHeight = document.documentElement.scrollHeight;
-                const scrollTop = window.scrollY || document.documentElement.scrollTop;
-                if (scrollHeight <= clientHeight) {
-                    return 'v';
-                }
-                const atBottom = (clientHeight + scrollTop >= scrollHeight - 5);
-                if (atBottom) {
-                    return 'j';
-                }
-                return realKey; 
-            }
-
             // KEYDEF: 'u' Undoes 'j' by emitting [g h j j o]
             // Since miniflux is a SPA, no need to manage document resets
             if (realKey === 'u') {
@@ -122,3 +147,31 @@
         configurable: true
     });
 })();
+
+// open links to article into the same window named "miniflux-reader"
+function setupMinifluxReader() {
+    // find and modify the links in the page
+    function updateMinifluxLinks() {
+        const links = document.querySelectorAll('a[target="_blank"]');
+        links.forEach(link => {
+            link.target = 'miniflux-reader';
+            if (link.rel) {
+                // Stripping noopener is required for tab reuse
+                link.rel = link.rel.replace(/noopener|noreferrer/gi, '').trim();
+            }
+        });
+    }
+    // Run immediately to modify links already on the screen
+    updateMinifluxLinks();
+    // Set up an observer to watch for new articles loaded via scrolling/AJAX
+    const observer = new MutationObserver(() => {
+        updateMinifluxLinks();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+// Ensure the page is completely loaded before running our script
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupMinifluxReader);
+} else {
+    setupMinifluxReader();
+}
