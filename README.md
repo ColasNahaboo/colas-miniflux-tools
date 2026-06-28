@@ -32,5 +32,5 @@ But it will surely evolve as I become more and more familiar with Miniflux.
 
 ## History
 
-- v2 2026-06-28 opens original article in talways the same window
+- v2 2026-06-28 opens original article in always the same window
 - v1 2026-06-18 first edition

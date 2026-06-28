@@ -73,7 +73,8 @@ function openInMinifluxReaderWindow() {
                 const scrollHeight = document.documentElement.scrollHeight;
                 const scrollTop = window.scrollY || document.documentElement.scrollTop;
                 if (scrollHeight <= clientHeight) {
-                    return openInMinifluxReaderWindow();
+                    openInMinifluxReaderWindow();
+                    return 'j';
                 }
                 const atBottom = (clientHeight + scrollTop >= scrollHeight - 5);
                 if (atBottom) {
