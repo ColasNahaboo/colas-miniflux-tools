@@ -118,7 +118,7 @@ function openInMinifluxReaderWindow() {
                 return ''; 
             }
 
-            // KEYDEF: 'u' Undoes 'j' by emitting [g h j j o]
+            // KEYDEF: 'i' Undoes 'j' by emitting [g h j j o]
             // Since miniflux is a SPA, no need to manage document resets
             if (realKey === 'i') {
                 const macroSequence = ['g', 'h', 'j', 'j', 'o'];
