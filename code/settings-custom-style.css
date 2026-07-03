@@ -3,7 +3,7 @@ Shows the next and prev article titles explicitely instead of having to hover
 on them. Very useful when quickly going through articles.
 Only the Next article titke is in bold, as it is the one the more useful.
 
-
+The next title is also copied under the page title for better visibility
 */
 
 .pagination-prev a[title]::after,
@@ -15,14 +15,25 @@ Only the Next article titke is in bold, as it is the one the more useful.
     margin-top: 5px;
     opacity: 0.75; 
     word-wrap: break-word;
-}
-.pagination-prev a::after {
-    text-align: left;
     font-size: 0.8em;
     font-weight: normal;
 }
+.pagination-prev a::after {
+    text-align: left;
+}
 .pagination-next a::after {
     text-align: right;
-    font-size: 1em;
+}
+
+/* Style adjustments for the top-placed Next link */
+.top-next-link-container {
+    margin-top: 10px;
+    margin-bottom: 20px;
     font-weight: bold;
+    font-size: 0.9em;
+    background-color: rgba(0, 0, 0, 0.05); /* Soft background button wrapper */
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: right; /* Header next layouts read left-aligned better */
 }

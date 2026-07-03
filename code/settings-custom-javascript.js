@@ -1,5 +1,13 @@
-// v2 https://github.com/ColasNahaboo/colas-miniflux-tools
+// v3 https://github.com/ColasNahaboo/colas-miniflux-tools
 // paste this in the Miniflux settings, Application Settings / Custom JavaScript
+
+// IMPORTANT: Use a browser extension to supress the HTTP response header
+// Cross-Origin-Opener-Policy
+// like https://github.com/warren-bank/crx-simple-modify-headers/tree/extended
+// To be sure that original articles open ALWAYS in the same window
+
+// Maintain a global reference to the reader window so we can message it
+let readerWindowReference = null;
 
 function openInMinifluxReaderWindow() {
     // Find the original link. 
@@ -10,8 +18,13 @@ function openInMinifluxReaderWindow() {
         link = document.querySelector('a[data-original-link="true"]');
     }
     if (link && link.href) {
-        // Open the URL in our specific, reusable window
-        window.open(link.href, 'miniflux-reader');
+        // Open the URL in our specific, reusable window and track its context reference
+        readerWindowReference = window.open(link.href, 'miniflux-reader');
+        
+        // Windows focus fix: immediately snap focus back to Miniflux window
+        if (readerWindowReference) {
+            window.focus();
+        }
     }
     // mark the article as read if we did not open it
     if (! /^\/(entry)(\/|$)/.test(window.location.pathname)) {
@@ -28,7 +41,8 @@ function openInMinifluxReaderWindow() {
 // 'n' scrolls down the page, and jumps to next item when at the bottom
 // 'x' scrolls up by half a page
 // 'i' Undoes 'j' by emitting [g, h, j, j, o] to get prev item from history
-// also, 'q w e' synonyms of 'x space j' for common navigation with left-hand
+// also, 'q w e' synonyms of 'k space j' for common navigation with left-hand
+// ',' and '.' remotely scroll the miniflux-reader window up and down
 
 (function() {
     // Intercept the key event at the root prototype level before ANY listener
@@ -40,7 +54,7 @@ function openInMinifluxReaderWindow() {
             // CHECK 1: Do not modify keys if typing in a text/input field
             const activeEl = document.activeElement;
             if (activeEl && (
-                activeEl.tagName === 'INPUT' || 
+                activeEl.tagName === 'INPUT' ||  
                 activeEl.tagName === 'TEXTAREA' || 
                 activeEl.isContentEditable
             )) {
@@ -68,6 +82,11 @@ function openInMinifluxReaderWindow() {
                 return 'j';
             }
 
+            // KEYDEF: 'q' synonym of 'k' go to previous article
+            if (realKey === 'q') {
+                return 'k';
+            }
+
             // KEYDEF: ' ' or ' w'  Smart Space either
             // scrolls down natively, goes to original article, or go next item
             if (realKey === ' ' || realKey == 'w') {
@@ -89,7 +108,7 @@ function openInMinifluxReaderWindow() {
                 return realKey; 
             }
             
-            // KEYDEF: 'x' or 'q' Half-Page Scroll Up, as key is close to space.
+            // KEYDEF: 'x' Half-Page Scroll Up, as key is close to space.
             if (realKey === 'x' || realKey == 'q') {
                 const clientHeight = document.documentElement.clientHeight;
                 const scrollHeight = document.documentElement.scrollHeight;
@@ -144,7 +163,23 @@ function openInMinifluxReaderWindow() {
                         (document.activeElement || document).dispatchEvent(macroEvent);
                     }, timings[index]);
                 });
-                return ""; // swallow the original 'u' key execution
+                return ""; // swallow the original 'i' key execution
+            }
+
+            // KEYDEF: ',' (Comma) -> Remote Scroll Up reader window
+            if (realKey === ',') {
+                if (readerWindowReference && !readerWindowReference.closed) {
+                    readerWindowReference.postMessage({ action: 'scrollReader', direction: 'up' }, '*');
+                }
+                return ''; 
+            }
+
+            // KEYDEF: '.' (Dot) -> Remote Scroll Down reader window
+            if (realKey === '.') {
+                if (readerWindowReference && !readerWindowReference.closed) {
+                    readerWindowReference.postMessage({ action: 'scrollReader', direction: 'down' }, '*');
+                }
+                return ''; 
             }
             
             // ============ KEYDEFS END ============
@@ -154,3 +189,44 @@ function openInMinifluxReaderWindow() {
         configurable: true
     });
 })();
+
+// Handles layout modifications and DOM updates
+function runMinifluxLayoutTweaks() {
+    // Only target single article views
+    if (/\/entry\//.test(window.location.pathname)) {
+        // Find the main article H1 header element
+        const titleHeader = document.getElementById('page-header-title');
+        const nextLink = document.querySelector('a[data-page="next"]');
+        // Check if both elements are present and prevent duplicate injections
+        if (titleHeader && nextLink && !document.querySelector('.top-next-link-container')) {
+            const container = document.createElement('div');
+            container.className = 'top-next-link-container';
+            
+            // Extract the title text string from the link attribute
+            const nextTitleText = nextLink.getAttribute('title');
+            
+            if (nextTitleText) {
+                // Insert the title text into our container
+                container.textContent = "Next: " + nextTitleText;
+                // Insert it right after the <h1> tag
+                titleHeader.parentNode.insertBefore(container, titleHeader.nextSibling);
+            }
+        }
+    }
+}
+
+// Ensure the page setup checks fire cleanly across SPA rendering switches
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runMinifluxLayoutTweaks);
+} else {
+    runMinifluxLayoutTweaks();
+}
+
+// Observe page mutation changes to automatically adapt top header links on new entries
+const layoutObserver = new MutationObserver(() => {
+    // Only re-inject if our top layout holder doesn't already exist on screen
+    if (!document.querySelector('.top-next-link-container')) {
+        runMinifluxLayoutTweaks();
+    }
+});
+layoutObserver.observe(document.body, { childList: true, subtree: true });
