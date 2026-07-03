@@ -26,8 +26,9 @@ function openInMinifluxReaderWindow() {
 //    - if the page can scroll down, scroll down natively
 //    - if we are at the bottom, emit 'j' (Go to next item)
 // 'n' scrolls down the page, and jumps to next item when at the bottom
-// 'i' scrolls up by half a page
-// 'u' Undoes 'j' by emitting [g, h, j, j, o] to get prev item from history
+// 'x' scrolls up by half a page
+// 'i' Undoes 'j' by emitting [g, h, j, j, o] to get prev item from history
+// also, 'q w e' synonyms of 'x space j' for common navigation with left-hand
 
 (function() {
     // Intercept the key event at the root prototype level before ANY listener
@@ -62,9 +63,14 @@ function openInMinifluxReaderWindow() {
                 return openInMinifluxReaderWindow();
             }
 
-            // KEYDEF: ' ' Smart Space either
+            // KEYDEF: 'e' synonym of 'j' go to next article
+            if (realKey === 'e') {
+                return 'j';
+            }
+
+            // KEYDEF: ' ' or ' w'  Smart Space either
             // scrolls down natively, goes to original article, or go next item
-            if (realKey === ' ') {
+            if (realKey === ' ' || realKey == 'w') {
                 // dont scroll on items lists
                 if (/^\/(unread|category\/[0-9]*\/entries)$/.test(window.location.pathname)) {
                     return openInMinifluxReaderWindow();
@@ -83,8 +89,8 @@ function openInMinifluxReaderWindow() {
                 return realKey; 
             }
             
-            // KEYDEF: 'i' Half-Page Scroll Up
-            if (realKey === 'i') {
+            // KEYDEF: 'x' or 'q' Half-Page Scroll Up, as key is close to space.
+            if (realKey === 'x' || realKey == 'q') {
                 const clientHeight = document.documentElement.clientHeight;
                 const scrollHeight = document.documentElement.scrollHeight;
                 if (scrollHeight <= clientHeight) {
