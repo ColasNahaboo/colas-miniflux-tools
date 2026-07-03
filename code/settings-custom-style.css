@@ -1,0 +1,28 @@
+/*
+Shows the next and prev article titles explicitely instead of having to hover
+on them. Very useful when quickly going through articles.
+Only the Next article titke is in bold, as it is the one the more useful.
+
+
+*/
+
+.pagination-prev a[title]::after,
+.pagination-next a[title]::after {
+    content: attr(title);
+    display: inline-block;
+    width: 100%;
+    text-decoration: none;
+    margin-top: 5px;
+    opacity: 0.75; 
+    word-wrap: break-word;
+}
+.pagination-prev a::after {
+    text-align: left;
+    font-size: 0.8em;
+    font-weight: normal;
+}
+.pagination-next a::after {
+    text-align: right;
+    font-size: 1em;
+    font-weight: bold;
+}
