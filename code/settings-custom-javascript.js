@@ -120,7 +120,7 @@ function openInMinifluxReaderWindow() {
 
             // KEYDEF: 'u' Undoes 'j' by emitting [g h j j o]
             // Since miniflux is a SPA, no need to manage document resets
-            if (realKey === 'u') {
+            if (realKey === 'i') {
                 const macroSequence = ['g', 'h', 'j', 'j', 'o'];
                 // Wait milliseconds between keys, especially after h
                 // that loads the history
@@ -148,31 +148,3 @@ function openInMinifluxReaderWindow() {
         configurable: true
     });
 })();
-
-// open links to article into the same window named "miniflux-reader"
-function setupMinifluxReader() {
-    // find and modify the links in the page
-    function updateMinifluxLinks() {
-        const links = document.querySelectorAll('a[target="_blank"]');
-        links.forEach(link => {
-            link.target = 'miniflux-reader';
-            if (link.rel) {
-                // Stripping noopener is required for tab reuse
-                link.rel = link.rel.replace(/noopener|noreferrer/gi, '').trim();
-            }
-        });
-    }
-    // Run immediately to modify links already on the screen
-    updateMinifluxLinks();
-    // Set up an observer to watch for new articles loaded via scrolling/AJAX
-    const observer = new MutationObserver(() => {
-        updateMinifluxLinks();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-}
-// Ensure the page is completely loaded before running our script
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupMinifluxReader);
-} else {
-    setupMinifluxReader();
-}
