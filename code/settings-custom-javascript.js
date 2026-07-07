@@ -27,7 +27,7 @@ function openInMinifluxReaderWindow() {
         }
     }
     // mark the article as read if we did not open it
-    if (! /^\/(entry)(\/|$)/.test(window.location.pathname)) {
+    if (! /\/(entry)(\/|$)/.test(window.location.pathname)) {
         return 'm';
     }
     return '';
