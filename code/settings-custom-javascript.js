@@ -1,6 +1,10 @@
 // v3 https://github.com/ColasNahaboo/colas-miniflux-tools
 // paste this in the Miniflux settings, Application Settings / Custom JavaScript
 
+
+//=============================================================================
+// open the original articled always in the same window
+
 // IMPORTANT: Use a browser extension to supress the HTTP response header
 // Cross-Origin-Opener-Policy
 // like https://github.com/warren-bank/crx-simple-modify-headers/tree/extended
@@ -32,6 +36,9 @@ function openInMinifluxReaderWindow() {
     }
     return '';
 }
+
+//=============================================================================
+// (Re)Define some keys
 
 // 'b' acts as 'v' on view: Open original link
 // ' ' on an article:
@@ -190,6 +197,8 @@ function openInMinifluxReaderWindow() {
     });
 })();
 
+//=============================================================================
+// More visible Prev/Next article links
 // Handles layout modifications and DOM updates
 function runMinifluxLayoutTweaks() {
     // Only target single article views
@@ -230,3 +239,106 @@ const layoutObserver = new MutationObserver(() => {
     }
 });
 layoutObserver.observe(document.body, { childList: true, subtree: true });
+
+//=============================================================================
+// Enable thumbnails, by capsuleman
+// https://github.com/miniflux/v2/issues/766#issuecomment-3449003220
+const makeThumb = (src) => {
+  const img = document.createElement("img");
+  img.src = src;
+  img.style.float = "right";
+  img.style.height = "100px";
+  img.style.marginLeft = "5px";
+  return img;
+};
+
+const fetchUser = async () => {
+  const response = await fetch("/v1/me");
+  return response.json();
+};
+
+const fetchAllEntries = async (params) => {
+  const response = await fetch(`/v1/entries?${params.toString()}`);
+  const data = await response.json();
+  return data.entries;
+};
+
+const fetchCategoryEntries = async (categoryId, params) => {
+  const response = await fetch(
+    `/v1/categories/${categoryId}/entries?${params.toString()}`
+  );
+  const data = await response.json();
+  return data.entries;
+};
+
+const fetchFeedEntries = async (feedId, params) => {
+  const response = await fetch(
+    `/v1/feeds/${feedId}/entries?${params.toString()}`
+  );
+  const data = await response.json();
+  return data.entries;
+};
+
+const getEntries = async () => {
+  const currentUser = await fetchUser();
+
+  const params = new URLSearchParams({
+    limit: currentUser.entries_per_page,
+    order: currentUser.entry_sorting_order,
+    direction: currentUser.entry_sorting_direction,
+    offset: new URLSearchParams(window.location.search).get("offset") ?? 0,
+  });
+
+  const currentPage = document.location.pathname;
+  if (currentPage === "/unread") {
+    params.set("status", "unread");
+    return fetchAllEntries(params);
+  }
+  if (currentPage === "/starred") {
+    params.set("starred", true);
+    return fetchAllEntries(params);
+  }
+  if (currentPage === "/history") {
+    // https://github.com/miniflux/v2/blob/7e2dd3afe64b3fad4de149d2a993c8e890d5db27/internal/ui/history_entries.go#L26
+    params.set("status", "read");
+    params.set("direction", "desc");
+    params.set("order[]", "changed_at");
+    params.set("order[]", "published_at");
+    return fetchAllEntries(params);
+  }
+
+  const matchResult = currentPage.match(
+    "^/(feed|category)/([0-9]+)/entries(/all)?$"
+  );
+
+  if (matchResult) {
+    const [_, type, id, all] = matchResult;
+
+    if (!all) {
+      params.set("status", "unread");
+    }
+
+    if (type === "category" && id) {
+      return fetchCategoryEntries(id, params);
+    }
+
+    if (type === "feed" && id) {
+      return fetchFeedEntries(id, params);
+    }
+  }
+
+  return [];
+};
+
+const entries = await getEntries();
+
+entries.forEach((entry) => {
+  const imageEnclosure = entry.enclosures.find((enclosure) =>
+    enclosure.mime_type.startsWith("image/")
+  );
+  if (!imageEnclosure) return;
+
+  const thumb = makeThumb(imageEnclosure.url);
+  const item = document.querySelector(`[data-id="${entry.id}"]`);
+  item.prepend(thumb);
+});
